@@ -29,37 +29,109 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         return true
     }
     
+//    func fetchCurrentLocation() {
+//        guard let placesClient = placesClient else { return }
+//        
+//        // Specify the fields of interest for the places
+//        let fields: GMSPlaceField = [.name, .placeID, .formattedAddress, .coordinate]
+//        
+//        placesClient.findPlaceLikelihoodsFromCurrentLocation(withPlaceFields: fields) { [weak self] placeLikelihoodList, error in
+//            if let error = error {
+//                print("An error occurred: \(error.localizedDescription)")
+//                return
+//            }
+//            
+//            // Check if the placeLikelihoodList is available
+//            guard let placeLikelihoodList = placeLikelihoodList else {
+//                self?.places = [] // Assign an empty array if no results
+//                return
+//            }
+//            
+//            // Map the likelihoods into the places array
+//            self?.places = placeLikelihoodList.compactMap { likelihood in
+//                let place = likelihood.place // Likelihood contains a non-optional place
+//                return Place(
+//                    name: place.name ?? "Unknown", // Fallback if name is missing
+//                    address: place.formattedAddress ?? "No Address", // Fallback for address
+//                    latitude: place.coordinate.latitude, // Latitude
+//                    longitude: place.coordinate.longitude, // Longitude
+//                    likelihood: likelihood.likelihood // Likelihood score
+//                )
+//            }
+//        }
+//    }
+    
+    
     func fetchCurrentLocation() {
-        guard let placesClient = placesClient else { return }
-        
-        // Specify the fields of interest for the places
-        let fields: GMSPlaceField = [.name, .placeID, .formattedAddress, .coordinate]
-        
-        placesClient.findPlaceLikelihoodsFromCurrentLocation(withPlaceFields: fields) { [weak self] placeLikelihoodList, error in
-            if let error = error {
-                print("An error occurred: \(error.localizedDescription)")
-                return
-            }
-            
-            // Check if the placeLikelihoodList is available
-            guard let placeLikelihoodList = placeLikelihoodList else {
-                self?.places = [] // Assign an empty array if no results
-                return
-            }
-            
-            // Map the likelihoods into the places array
-            self?.places = placeLikelihoodList.compactMap { likelihood in
-                let place = likelihood.place // Likelihood contains a non-optional place
-                return Place(
-                    name: place.name ?? "Unknown", // Fallback if name is missing
-                    address: place.formattedAddress ?? "No Address", // Fallback for address
-                    latitude: place.coordinate.latitude, // Latitude
-                    longitude: place.coordinate.longitude, // Longitude
-                    likelihood: likelihood.likelihood // Likelihood score
-                )
-            }
+        // Get the user's current location
+        guard let currentLocation = locationManager.location else {
+            print("Location not available")
+            return
         }
+
+        // API parameters
+        let latitude = currentLocation.coordinate.latitude
+        let longitude = currentLocation.coordinate.longitude
+        let radius = 1000 // Search within 1 km
+        let keyword = "boba"
+        let apiKey = APIKeys.googlePlacesAPIKey
+
+        // Construct the API URL
+        let urlString = "https://maps.googleapis.com/maps/api/place/nearbysearch/json?location=\(latitude),\(longitude)&radius=\(radius)&keyword=\(keyword)&key=\(apiKey)"
+        guard let url = URL(string: urlString) else {
+            print("Invalid URL")
+            return
+        }
+
+        // Perform the network request
+        URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
+            if let error = error {
+                print("Error fetching places: \(error.localizedDescription)")
+                return
+            }
+
+            guard let data = data else {
+                print("No data returned")
+                return
+            }
+
+            do {
+                // Decode the JSON response
+                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
+                guard let results = json?["results"] as? [[String: Any]] else { return }
+
+                // Map the results to Place objects
+                let bobaPlaces = results.compactMap { result -> Place? in
+                    guard
+                        let name = result["name"] as? String,
+                        let address = result["vicinity"] as? String,
+                        let geometry = result["geometry"] as? [String: Any],
+                        let location = geometry["location"] as? [String: Any],
+                        let rating = result["rating"] as? Double,
+                        let lat = location["lat"] as? Double,
+                        let lng = location["lng"] as? Double
+                            
+                    else { return nil }
+
+                    return Place(
+                        name: name,
+                        address: address,
+                        latitude: lat,
+                        longitude: lng,
+                        likelihood: 0, // Likelihood is not provided by Nearby Search,
+                        rating: rating
+                    )
+                }
+
+                DispatchQueue.main.async {
+                    self?.places = bobaPlaces
+                }
+            } catch {
+                print("Error parsing JSON: \(error.localizedDescription)")
+            }
+        }.resume()
     }
+
 
 
 

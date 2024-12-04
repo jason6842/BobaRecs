@@ -25,6 +25,8 @@ struct ContentView: View {
                                 .font(.subheadline)
                             Text("Coordinates: \(place.latitude), \(place.longitude)")
                                 .font(.caption)
+                            Text("Rating: \(place.rating)")
+                                .font(.caption)
                             Text("Likelihood: \(place.likelihood, specifier: "%.2f")")
                                 .font(.footnote)
                                 .foregroundColor(.gray)

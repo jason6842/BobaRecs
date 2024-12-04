@@ -15,4 +15,6 @@ struct Place: Identifiable {
     let latitude: Double
     let longitude: Double
     let likelihood: Double
+    var distance: Double?
+    let rating: Double
 }
