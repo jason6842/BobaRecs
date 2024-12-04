@@ -14,6 +14,7 @@ struct BobaRecsApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(appDelegate)
         }
     }
 }
