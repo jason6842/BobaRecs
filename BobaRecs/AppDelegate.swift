@@ -9,13 +9,6 @@ import UIKit
 import GooglePlaces
 import CoreLocation
 
-//// so ForEach can now use it
-//extension GMSPlace: Identifiable {
-//    public var id: String {
-//        return placeID ?? UUID().uuidString
-//    }
-//}
-
 class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate, ObservableObject {
     
     var window: UIWindow?
@@ -28,7 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
         // Override point for customization after application launch.
-        GMSPlacesClient.provideAPIKey("AIzaSyCbU9XHX4J69hK8DHCfKFleljCkrqk_3Lk")
+        GMSPlacesClient.provideAPIKey(APIKeys.googlePlacesAPIKey)
         locationManager.requestAlwaysAuthorization()
         locationManager.requestWhenInUseAuthorization()
         placesClient = GMSPlacesClient.shared()
