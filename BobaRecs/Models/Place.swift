@@ -18,5 +18,6 @@ struct Place: Identifiable {
     let likelihood: Double
     var distance: Double?
     let rating: Double
-    var photoReference: String? // Store photo reference as a string
+    let placeID: String // Needs placeID to retrieve more than 1 photo
+    var photoReferences: [String] // Store photo reference as a string
 }

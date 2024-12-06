@@ -53,6 +53,8 @@ struct AsyncImage: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
+                    .frame(maxWidth: UIScreen.main.bounds.width - 32) // Make it fit within the screen
+                    .clipped() // Prevents overflow outside of the frame
             } else {
                 ProgressView()
                     .onAppear {
@@ -63,6 +65,24 @@ struct AsyncImage: View {
                         }
                     }
             }
+        }
+    }
+}
+
+struct PhotoCarouselView: View {
+    let photoReferences: [String]
+    var body: some View {
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 16) {
+//                print(photoReferences)
+                ForEach(photoReferences, id: \.self) { reference in
+                    AsyncImage(photoReference: reference)
+                        .frame(width: UIScreen.main.bounds.width - 32) // Limit the image's width
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+                        .shadow(radius: 5)
+                }
+            }
+            .padding(.horizontal)
         }
     }
 }

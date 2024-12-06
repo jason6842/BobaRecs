@@ -8,22 +8,24 @@
 import SwiftUI
 
 struct BobaDetailsPlaceView: View {
+    @State private var photoReferences: [String] = []
     let place: Place
+    
     var body: some View {
         NavigationView {
             VStack(alignment: .leading, spacing: 16) {
-                // Photo or placeholder
-                if let photoReference = place.photoReference {
-                    AsyncImage(photoReference: photoReference)
-                        .frame(width: 400, height: 400)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        .padding(.bottom, 16)
+                // Displays photo carousel
+                if !place.photoReferences.isEmpty {
+                    PhotoCarouselView(photoReferences: place.photoReferences)
                 } else {
-                    Rectangle()
-                        .fill(Color.gray.opacity(0.3))
-                        .frame(width: 400, height: 400)
-                        .clipShape(RoundedRectangle(cornerRadius: 18))
-                        .padding(.bottom, 16)
+                    ProgressView("Loading photos")
+                        .onAppear() {
+                            GooglePlacesService.shared.fetchPlaceDetails(for: place.placeID) { photos in
+                                DispatchQueue.main.async {
+                                    self.photoReferences = photos	
+                                }
+                            }
+                        }
                 }
 
                 // Place details

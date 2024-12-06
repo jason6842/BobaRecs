@@ -72,7 +72,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
         // API parameters
         let latitude = currentLocation.coordinate.latitude
         let longitude = currentLocation.coordinate.longitude
-        let radius = 1000 // Search within 1 km
+        let radius = 1600 // Search within 1 km
         let keyword = "boba"
         let apiKey = APIKeys.googlePlacesAPIKey
 
@@ -109,20 +109,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         let location = geometry["location"] as? [String: Any],
                         let rating = result["rating"] as? Double,
                         let lat = location["lat"] as? Double,
-                        let lng = location["lng"] as? Double
+                        let lng = location["lng"] as? Double,
+                        let placeID = result["place_id"] as? String
 
                             
                             
                     else { return nil }
                    
                     // Extract photo metadata
-                    let photoReference: String? = {
-                        if let photos = result["photos"] as? [[String: Any]],
-                           let photoReference = photos.first?["photo_reference"] as? String {
-                            return photoReference
-                        }
-                        return nil
-                    }()
+//                    let photoReferences: [String] = {
+//                        if let photos = result["photos"] as? [[String: Any]] {
+////                            print(photos)
+//                            let references = photos.compactMap { $0["photo_reference"] as? String } // compactMap discards all the nil values
+////                            print("Photo References for \(name): \(references)")
+////                            print(references.count)
+//                            
+//                            return references
+//                        }
+//                        return []
+//                    }()
                     
                     
                     return Place(
@@ -132,12 +137,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         longitude: lng,
                         likelihood: 0, // Likelihood is not provided by Nearby Search,
                         rating: rating,
-                        photoReference: photoReference
+                        placeID: placeID,
+                        photoReferences: []
                     )
                 }
 
                 DispatchQueue.main.async {
                     self?.places = bobaPlaces
+                    
+                    bobaPlaces.forEach { place in
+                        GooglePlacesService.shared.fetchPlaceDetails(for: place.placeID) { photoReferences in
+                            if let index = self?.places.firstIndex(where: { $0.placeID == place.placeID }) {
+                                DispatchQueue.main.async {
+                                    self?.places[index].photoReferences = photoReferences
+                                    print("Photo References for placeID \(place.placeID): \(place.photoReferences)")
+                                }
+                            }
+                        }
+                    }
                 }
             } catch {
                 print("Error parsing JSON: \(error.localizedDescription)")
