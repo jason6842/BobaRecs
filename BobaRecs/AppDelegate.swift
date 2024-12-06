@@ -110,16 +110,29 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         let rating = result["rating"] as? Double,
                         let lat = location["lat"] as? Double,
                         let lng = location["lng"] as? Double
+
+                            
                             
                     else { return nil }
-
+                   
+                    // Extract photo metadata
+                    let photoReference: String? = {
+                        if let photos = result["photos"] as? [[String: Any]],
+                           let photoReference = photos.first?["photo_reference"] as? String {
+                            return photoReference
+                        }
+                        return nil
+                    }()
+                    
+                    
                     return Place(
                         name: name,
                         address: address,
                         latitude: lat,
                         longitude: lng,
                         likelihood: 0, // Likelihood is not provided by Nearby Search,
-                        rating: rating
+                        rating: rating,
+                        photoReference: photoReference
                     )
                 }
 

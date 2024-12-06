@@ -7,6 +7,7 @@
 
 import Foundation
 import CoreLocation
+import GooglePlaces
 
 struct Place: Identifiable {
     let id = UUID()
@@ -17,4 +18,5 @@ struct Place: Identifiable {
     let likelihood: Double
     var distance: Double?
     let rating: Double
+    var photoReference: String? // Store photo reference as a string
 }

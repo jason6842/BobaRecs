@@ -18,23 +18,51 @@ struct ContentView: View {
                         .font(.headline)
                 } else {
                     List(appDelegate.places) { place in
-                        VStack(alignment: .leading) {
-                            Text(place.name)
-                                .font(.headline)
-                            Text(place.address)
-                                .font(.subheadline)
-                            Text("Coordinates: \(place.latitude), \(place.longitude)")
-                                .font(.caption)
-                            Text("Rating: \(place.rating)")
-                                .font(.caption)
-                            Text("Likelihood: \(place.likelihood, specifier: "%.2f")")
-                                .font(.footnote)
-                                .foregroundColor(.gray)
+                        
+                        NavigationLink(destination: BobaDetailsPlaceView(place: place)) {
+                            VStack(alignment: .leading) {
+                                Text(place.name)
+                                    .font(.headline)
+                                Text(place.address)
+                                    .font(.subheadline)
+                                Text("Coordinates: \(place.latitude), \(place.longitude)")
+                                    .font(.caption)
+                                Text("Rating: \(place.rating)")
+                                    .font(.caption)
+                                Text("Likelihood: \(place.likelihood, specifier: "%.2f")")
+                                    .font(.footnote)
+                                    .foregroundColor(.gray)
+                            }
                         }
                     }
                 }
             }
             .navigationTitle("Nearby Places")
+        }
+    }
+}
+
+// AsyncImage view for Loading Photos
+struct AsyncImage: View {
+    let photoReference: String
+    @State private var image: UIImage? = nil
+    
+    var body: some View {
+        Group {
+            if let image = image {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFit()
+            } else {
+                ProgressView()
+                    .onAppear {
+                        GooglePlacesService.shared.fetchPhoto(with: photoReference) { fetchedImage in
+                            DispatchQueue.main.async {
+                                self.image = fetchedImage
+                            }
+                        }
+                    }
+            }
         }
     }
 }
