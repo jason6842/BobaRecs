@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var appDelegate: AppDelegate
+    @State var showingBottomSheet = false
 
     var body: some View {
         NavigationView {
@@ -29,6 +30,8 @@ struct ContentView: View {
                                     .font(.caption)
                                 Text("Rating: \(place.rating)")
                                     .font(.caption)
+                                Text("Price: \(place.priceLevel != nil ? String(repeating: "$", count: place.priceLevel) : "N/A")")
+                                    .font(.caption)
                                 Text("Likelihood: \(place.likelihood, specifier: "%.2f")")
                                     .font(.footnote)
                                     .foregroundColor(.gray)
@@ -38,6 +41,20 @@ struct ContentView: View {
                 }
             }
             .navigationTitle("Nearby Places")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: {
+                        print("Button tapped")
+                        showingBottomSheet.toggle()
+                    }) {
+                        Image(systemName: "slider.horizontal.3")
+                    }
+                }
+            }
+            .sheet(isPresented: $showingBottomSheet) {
+                SortOptionsView()
+                    .presentationDetents([.fraction(0.4), .medium])
+            }
         }
     }
 }

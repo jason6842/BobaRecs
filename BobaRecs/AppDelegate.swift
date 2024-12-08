@@ -110,7 +110,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         let rating = result["rating"] as? Double,
                         let lat = location["lat"] as? Double,
                         let lng = location["lng"] as? Double,
-                        let placeID = result["place_id"] as? String
+                        let placeID = result["place_id"] as? String,
+                        let priceLevel = result["price_level"] as? Int
 
                             
                             
@@ -137,6 +138,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, CLLocationManagerDelegate
                         longitude: lng,
                         likelihood: 0, // Likelihood is not provided by Nearby Search,
                         rating: rating,
+                        priceLevel: priceLevel,
                         placeID: placeID,
                         photoReferences: []
                     )
