@@ -10,6 +10,20 @@ import SwiftUI
 struct ContentView: View {
     @EnvironmentObject var appDelegate: AppDelegate
     @State var showingBottomSheet = false
+    @State private var selectedSortOption: SortOptions = .distance
+    
+    func getPlacesByCategory(by selectedSortOption: SortOptions) -> [Place] {
+        switch selectedSortOption {
+        case .priceHighToLow:
+            return appDelegate.places.sorted { $0.priceLevel > $1.priceLevel }
+        case .priceLowToHigh:
+            return appDelegate.places.sorted { $0.priceLevel < $1.priceLevel }
+        case .rating:
+            return appDelegate.places.sorted { $0.rating > $1.rating }
+        case .distance:
+            return appDelegate.places.sorted { $0.distance ?? 0 < $1.distance ?? 0 }
+        }
+    }
 
     var body: some View {
         NavigationView {
@@ -18,7 +32,7 @@ struct ContentView: View {
                     Text("No places found.")
                         .font(.headline)
                 } else {
-                    List(appDelegate.places) { place in
+                    List(getPlacesByCategory(by: selectedSortOption)) { place in
                         
                         NavigationLink(destination: BobaDetailsPlaceView(place: place)) {
                             VStack(alignment: .leading) {
@@ -28,7 +42,7 @@ struct ContentView: View {
                                     .font(.subheadline)
                                 Text("Coordinates: \(place.latitude), \(place.longitude)")
                                     .font(.caption)
-                                Text("Rating: \(place.rating)")
+                                Text("Rating: \(String(format: "%.1f", place.rating))")
                                     .font(.caption)
                                 Text("Price: \(place.priceLevel != nil ? String(repeating: "$", count: place.priceLevel) : "N/A")")
                                     .font(.caption)
@@ -52,7 +66,7 @@ struct ContentView: View {
                 }
             }
             .sheet(isPresented: $showingBottomSheet) {
-                SortOptionsView()
+                SortOptionsView(selectedOption: $selectedSortOption) // To determine which sortOption is chosen
                     .presentationDetents([.fraction(0.4), .medium])
             }
         }
@@ -103,6 +117,8 @@ struct PhotoCarouselView: View {
         }
     }
 }
+
+
 
 #Preview {
     ContentView()

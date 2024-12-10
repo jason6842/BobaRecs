@@ -8,7 +8,10 @@
 import SwiftUI
 
 struct SortOptionsView: View {
-    @State private var selectedOption: SortOptions = .distance // Default Selection
+//    @State private var selectedOption: SortOptions = .distance // Default Selection
+    @Binding var selectedOption: SortOptions // Binding to track the selected option
+    @Environment(\.presentationMode) var presentationMode // Access the environment variable to control the sheet
+    
     var body: some View {
         VStack (alignment: .leading){
 
@@ -44,6 +47,7 @@ struct SortOptionsView: View {
                 }
                 .onTapGesture {
                     selectedOption = option
+                    presentationMode.wrappedValue.dismiss()
                 }
                 .listRowSeparator(.hidden)
             }
@@ -53,6 +57,6 @@ struct SortOptionsView: View {
     }
 }
 
-#Preview {
-    SortOptionsView()
-}
+//#Preview {
+//    SortOptionsView()
+//}
